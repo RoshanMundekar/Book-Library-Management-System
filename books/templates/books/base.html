@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LibraryMS — Book Library Management{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: { 50:'#f0f4ff', 100:'#e0eaff', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 900:'#1e1b4b' },
+            },
+            backgroundImage: {
+              'hero-gradient': 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+              'card-shine':    'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.4s ease-out',
+              'slide-up':'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+              fadeIn:  { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              slideUp: { '0%': { opacity: '0', transform: 'translateY(16px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Inter', system-ui, sans-serif; }
+      .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+      .gradient-text { background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+      .btn-gradient { background: linear-gradient(135deg, #6366f1, #8b5cf6); transition: all 0.25s; }
+      .btn-gradient:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.4); }
+      .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+      .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.5); }
+      .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #fff; }
+      .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+      .input-field::placeholder { color: rgba(255,255,255,0.3); }
+      /* Force dark background on all native selects and their options */
+      select, select option { background-color: #1a1a2e !important; color: #e2e8f0 !important; }
+      select:focus { outline: none; }
+      option:hover, option:checked { background-color: #312e81 !important; color: #fff !important; }
+      /* Button active state — prevent browser white flash */
+      button:active { background-color: inherit; }
+      .nav-link-active { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+      .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-[#0a0a1a] text-gray-100 min-h-screen flex flex-col">
+
+<!-- ═══════════════════════════════════════════════════════════════ NAVBAR -->
+<header class="sticky top-0 z-50 glass border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a href="{% url 'book_list' %}" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl btn-gradient flex items-center justify-center text-lg shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">📚</div>
+        <div class="leading-none">
+          <span class="font-extrabold text-white text-lg tracking-tight">Library<span class="gradient-text">MS</span></span>
+          <span class="block text-[10px] text-gray-500 font-medium tracking-widest uppercase">Management System</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="{% url 'book_list' %}" class="px-4 py-2 rounded-xl text-sm font-medium transition-all {% if request.resolver_match.url_name == 'book_list' %}nav-link-active{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">📖 Books</a>
+        {% if user.is_authenticated %}
+          {% if user.groups.all.0.name == 'Admin' or user.groups.all.0.name == 'SuperAdmin' or user.is_superuser %}
+            <a href="{% url 'add_book' %}" class="px-4 py-2 rounded-xl text-sm font-medium transition-all {% if request.resolver_match.url_name == 'add_book' %}nav-link-active{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">✚ Add Book</a>
+            <a href="{% url 'scrape_books' %}" class="px-4 py-2 rounded-xl text-sm font-medium transition-all {% if request.resolver_match.url_name == 'scrape_books' %}nav-link-active{% else %}text-gray-400 hover:text-white hover:bg-white/5{% endif %}">🔍 Scrape</a>
+          {% endif %}
+        {% endif %}
+      </nav>
+
+      <!-- Right Side -->
+      <div class="hidden md:flex items-center gap-3">
+        {% if user.is_authenticated %}
+          <div class="flex items-center gap-2 px-3 py-1.5 glass rounded-xl">
+            <div class="w-7 h-7 rounded-lg btn-gradient flex items-center justify-center text-xs font-bold text-white">{{ user.username|first|upper }}</div>
+            <span class="text-sm text-gray-300 font-medium">{{ user.username }}</span>
+            {% if user.is_superuser %}
+              <span class="text-[10px] font-bold bg-gradient-to-r from-yellow-400 to-orange-400 text-transparent bg-clip-text border border-yellow-500/30 px-2 py-0.5 rounded-full">SUPER ADMIN</span>
+            {% elif user.groups.all.0.name %}
+              <span class="text-[10px] font-bold text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full uppercase">{{ user.groups.all.0.name }}</span>
+            {% else %}
+              <span class="text-[10px] font-bold text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">USER</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'logout' %}" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-400 border border-white/10 hover:border-red-500/50 hover:text-red-400 transition-all">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="px-5 py-2 btn-gradient rounded-xl text-sm font-semibold text-white shadow-lg shadow-indigo-500/25">Sign In</a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <button id="menuBtn" class="md:hidden p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+        <svg id="iconOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <svg id="iconClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden pb-4 border-t border-white/10 mt-2 pt-3 space-y-1 animate-fade-in">
+      <a href="{% url 'book_list' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all">📖 Books</a>
+      {% if user.is_authenticated %}
+        {% if user.groups.all.0.name == 'Admin' or user.groups.all.0.name == 'SuperAdmin' or user.is_superuser %}
+          <a href="{% url 'add_book' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all">✚ Add Book</a>
+          <a href="{% url 'scrape_books' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-all">🔍 Scrape</a>
+        {% endif %}
+        <div class="flex items-center gap-2 px-3 py-2">
+          <span class="text-sm text-gray-400">{{ user.username }}</span>
+          {% if user.is_superuser %}
+            <span class="text-[10px] font-bold text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-full">SUPER ADMIN</span>
+          {% elif user.groups.all.0.name %}
+            <span class="text-[10px] font-bold text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">{{ user.groups.all.0.name|upper }}</span>
+          {% endif %}
+        </div>
+        <a href="{% url 'logout' %}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="block text-center px-3 py-2.5 btn-gradient rounded-xl text-sm font-semibold text-white">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ FLASH MESSAGES -->
+{% if messages %}
+<div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4 space-y-2 animate-slide-up">
+  {% for message in messages %}
+    <div class="flex items-center justify-between px-5 py-3 rounded-2xl text-sm font-medium
+      {% if message.tags == 'success' %}bg-emerald-500/10 border border-emerald-500/25 text-emerald-300
+      {% elif message.tags == 'error' %}bg-red-500/10 border border-red-500/25 text-red-300
+      {% else %}bg-amber-500/10 border border-amber-500/25 text-amber-300{% endif %}">
+      <div class="flex items-center gap-2">
+        <span>{% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}⚠️{% endif %}</span>
+        <span>{{ message }}</span>
+      </div>
+      <button onclick="this.parentElement.style.display='none'" class="ml-4 text-xl opacity-50 hover:opacity-100 leading-none">&times;</button>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════ MAIN CONTENT -->
+<main class="flex-1 w-full">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════ FOOTER -->
+<footer class="mt-16 border-t border-white/10" style="background: rgba(10,10,26,0.95)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 sm:grid-cols-3 gap-8">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-lg btn-gradient flex items-center justify-center text-sm">📚</div>
+        <span class="font-extrabold text-white">Library<span class="gradient-text">MS</span></span>
+      </div>
+      <p class="text-xs text-gray-500 leading-relaxed">A modern book library management platform with web scraping, role-based access, and a beautiful user experience.</p>
+    </div>
+    <div>
+      <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Quick Links</h4>
+      <ul class="space-y-2 text-sm text-gray-500">
+        <li><a href="{% url 'book_list' %}" class="hover:text-indigo-400 transition-colors">📖 Browse Books</a></li>
+        {% if user.is_authenticated %}
+          {% if user.groups.all.0.name == 'Admin' or user.groups.all.0.name == 'SuperAdmin' or user.is_superuser %}
+            <li><a href="{% url 'add_book' %}" class="hover:text-indigo-400 transition-colors">✚ Add a Book</a></li>
+            <li><a href="{% url 'scrape_books' %}" class="hover:text-indigo-400 transition-colors">🔍 Scrape Books</a></li>
+          {% endif %}
+        {% endif %}
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Platform</h4>
+      <ul class="space-y-2 text-sm text-gray-500">
+        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> System Online</li>
+        <li>Built with Django 5.2 by roshan mundekar</li>
+        <li>Powered by books.toscrape.com</li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/5 py-4 text-center text-xs text-gray-700">
+    &copy; 2026 LibraryMS. All rights reserved.
+  </div>
+</footer>
+
+<script>
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const iconOpen = document.getElementById('iconOpen');
+  const iconClose = document.getElementById('iconClose');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+    iconOpen.classList.toggle('hidden');
+    iconClose.classList.toggle('hidden');
+  });
+  // Auto-dismiss messages
+  setTimeout(() => {
+    document.querySelectorAll('[class*="animate-slide-up"] > div').forEach(el => {
+      el.style.transition = 'opacity 0.5s'; el.style.opacity = '0';
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+{% extends 'books/base.html' %}
+{% block title %}Scrape Books — LibraryMS{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="relative overflow-hidden" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e)">
+  <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute -top-8 right-0 w-72 h-72 bg-violet-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-48 h-48 bg-indigo-600/15 rounded-full blur-2xl"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-xs text-indigo-300 font-semibold mb-4">
+      🔍 Web Scraper
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+      Scrape <span class="gradient-text">Books</span>
+    </h1>
+    <p class="text-gray-400 mt-2 text-sm sm:text-base">Import live book data directly from <code class="text-indigo-300 bg-white/5 px-2 py-0.5 rounded-lg">books.toscrape.com</code> by category</p>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+  <!-- Scrape Card -->
+  <div class="glass rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl shadow-black/40">
+    <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+      <span class="w-8 h-8 btn-gradient rounded-xl flex items-center justify-center text-sm">🚀</span>
+      Start Scraping
+    </h2>
+    <form method="post" id="scrapeForm">
+      {% csrf_token %}
+      <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
+        <div class="flex-1">
+          <label for="category_slug" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Select Category</label>
+          <select name="category_slug" id="category_slug" required
+                  class="input-field w-full px-4 py-3.5 rounded-2xl text-base transition-all">
+            <option value="">— Choose a category —</option>
+            {% for slug, name in categories %}
+              <option value="{{ slug }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" id="scrapeBtn"
+                class="shrink-0 px-8 py-3.5 btn-gradient text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+          <span id="scrapeLabel">🚀 Scrape Now</span>
+        </button>
+      </div>
+      <div class="flex items-start gap-3 bg-indigo-500/8 border-l-4 border-indigo-500/50 rounded-r-2xl px-4 py-3 text-xs text-gray-400">
+        <span class="text-indigo-400 mt-0.5">ℹ️</span>
+        Fetches up to <strong class="text-gray-200">5 pages (~100 books)</strong> per category. Existing books are updated (images patched), duplicates are skipped automatically.
+      </div>
+    </form>
+  </div>
+
+  <!-- Result Card -->
+  {% if result %}
+  <div class="glass rounded-3xl p-6 sm:p-8 border border-emerald-500/20 shadow-2xl shadow-emerald-900/20 animate-slide-up">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="text-4xl">✅</div>
+      <div>
+        <h2 class="text-xl font-extrabold text-white">Scrape Complete!</h2>
+        <p class="text-sm text-gray-400">Category: <strong class="text-indigo-300">{{ result.category }}</strong></p>
+      </div>
+    </div>
+    <div class="h-px bg-white/5 my-5"></div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div class="bg-white/3 border border-white/8 rounded-2xl p-4 text-center">
+        <span class="block text-4xl font-black text-white">{{ result.found }}</span>
+        <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1 block">Found</span>
+      </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-4 text-center">
+        <span class="block text-4xl font-black text-emerald-400">{{ result.created }}</span>
+        <span class="text-[10px] text-emerald-600 uppercase tracking-widest font-bold mt-1 block">Added</span>
+      </div>
+      <div class="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-4 text-center">
+        <span class="block text-4xl font-black text-amber-400">{{ result.updated }}</span>
+        <span class="text-[10px] text-amber-600 uppercase tracking-widest font-bold mt-1 block">Updated</span>
+      </div>
+      <div class="bg-white/3 border border-white/5 rounded-2xl p-4 text-center opacity-60">
+        <span class="block text-4xl font-black text-gray-500">{{ result.skipped }}</span>
+        <span class="text-[10px] text-gray-600 uppercase tracking-widest font-bold mt-1 block">Skipped</span>
+      </div>
+    </div>
+    <a href="{% url 'book_list' %}"
+       class="inline-flex items-center gap-2 px-6 py-3 btn-gradient text-white text-sm font-bold rounded-2xl shadow-xl shadow-indigo-500/25">
+      View Library →
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Category Chips Card -->
+  <div class="glass rounded-3xl p-6 sm:p-8 border border-white/10">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-sm font-extrabold text-white uppercase tracking-widest">Available Categories</h3>
+      <span class="text-xs font-bold text-indigo-400 bg-indigo-500/15 border border-indigo-500/25 px-2.5 py-1 rounded-full">{{ categories|length }} total</span>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {% for slug, name in categories %}
+        <button type="button" onclick="document.getElementById('category_slug').value='{{ slug }}'; window.scrollTo({top:0,behavior:'smooth'})"
+                style="background-color: rgba(255,255,255,0.04);"
+                class="px-3.5 py-1.5 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/10 active:bg-indigo-500/25 active:border-indigo-500/60 text-sm text-gray-300 hover:text-indigo-300 rounded-full transition-all cursor-pointer font-medium focus:outline-none">
+          {{ name }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+<script>
+  document.getElementById('scrapeForm').addEventListener('submit', function() {
+    const btn = document.getElementById('scrapeBtn');
+    const label = document.getElementById('scrapeLabel');
+    btn.disabled = true;
+    label.innerHTML = '⏳ Scraping… Please wait';
+  });
+</script>
+{% endblock %}

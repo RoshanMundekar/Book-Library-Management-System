@@ -1,0 +1,122 @@
+{% extends 'books/base.html' %}
+{% block title %}Edit: {{ book.title }} — LibraryMS{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center bg-amber-500/20 border border-amber-500/30 w-14 h-14 rounded-2xl text-2xl shadow-xl shadow-amber-500/20 mb-4">✏️</div>
+    <h1 class="text-2xl font-extrabold text-white">Edit Book</h1>
+    <p class="text-gray-500 text-sm mt-1">Updating: <span class="text-amber-400 font-semibold">"{{ book.title|truncatechars:40 }}"</span></p>
+  </div>
+
+  <div class="glass rounded-3xl p-7 sm:p-8 shadow-2xl border border-amber-500/10">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+          Book Title <span class="text-red-400">*</span>
+        </label>
+        <input type="text" id="title" name="title" value="{{ book.title }}" required
+               class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+      </div>
+
+      <!-- Category + Price -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="category" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Category</label>
+          <select id="category" name="category"
+                  class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+            <option value="">Select a category…</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if book.category and book.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="price" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Price (£) <span class="text-red-400">*</span>
+          </label>
+          <input type="number" id="price" name="price" step="0.01" min="0" value="{{ book.price }}" required
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+      </div>
+
+      <!-- Rating -->
+      <div>
+        <label for="rating" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Rating</label>
+        <select id="rating" name="rating"
+                class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+          <option value="">— No rating —</option>
+          {% for r in rating_choices %}
+            <option value="{{ r }}" {% if book.rating == r %}selected{% endif %}>
+              {% if r == 'One' %}⭐ One{% endif %}
+              {% if r == 'Two' %}⭐⭐ Two{% endif %}
+              {% if r == 'Three' %}⭐⭐⭐ Three{% endif %}
+              {% if r == 'Four' %}⭐⭐⭐⭐ Four{% endif %}
+              {% if r == 'Five' %}⭐⭐⭐⭐⭐ Five{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</label>
+        <textarea id="description" name="description" rows="5"
+                  class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all resize-y">{{ book.description }}</textarea>
+      </div>
+
+      <!-- Image URL + Source URL -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="image_url" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Cover Image URL</label>
+          <input type="url" id="image_url" name="image_url" value="{{ book.image_url }}"
+                 placeholder="https://…/cover.jpg"
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+        <div>
+          <label for="source_url" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Source URL</label>
+          <input type="url" id="source_url" name="source_url" value="{{ book.source_url }}"
+                 placeholder="https://books.toscrape.com/…"
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+      </div>
+
+      <!-- Live cover preview -->
+      <div id="imagePreviewBox" class="{% if not book.image_url %}hidden{% endif %}">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Cover Preview</p>
+        <img id="imagePreview" src="{{ book.image_url }}" alt="Cover preview"
+             class="h-40 rounded-2xl object-cover border border-white/10 shadow-lg">
+      </div>
+
+      {% if book.is_scraped %}
+      <div class="flex items-start gap-3 bg-indigo-500/8 border border-indigo-500/20 rounded-2xl p-4 text-sm">
+        <span class="text-indigo-400 mt-0.5">🔍</span>
+        <div class="text-gray-400">Scraped book — <a href="{{ book.source_url }}" target="_blank" class="text-indigo-400 hover:text-indigo-300 underline">view original source ↗</a></div>
+      </div>
+      {% endif %}
+
+      <div class="flex justify-end gap-3 pt-2">
+        <a href="{% url 'book_detail' book.pk %}"
+           class="px-5 py-3 glass border border-white/10 hover:bg-white/5 text-gray-400 hover:text-white text-sm font-semibold rounded-2xl transition-all">Cancel</a>
+        <button type="submit"
+                class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-2xl shadow-xl shadow-amber-500/25 transition-all hover:-translate-y-0.5">
+          Save Changes →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const imgInput = document.getElementById('image_url');
+  const previewBox = document.getElementById('imagePreviewBox');
+  const preview = document.getElementById('imagePreview');
+  imgInput.addEventListener('input', () => {
+    const url = imgInput.value.trim();
+    if (url) { preview.src = url; previewBox.classList.remove('hidden'); }
+    else { previewBox.classList.add('hidden'); }
+  });
+</script>
+{% endblock %}

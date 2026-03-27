@@ -1,0 +1,133 @@
+{% extends 'books/base.html' %}
+{% block title %}Add Book — LibraryMS{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+  <!-- Heading -->
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center btn-gradient w-14 h-14 rounded-2xl text-2xl shadow-xl shadow-indigo-500/30 mb-4">📖</div>
+    <h1 class="text-2xl font-extrabold text-white">Add New Book</h1>
+    <p class="text-gray-500 text-sm mt-1">Fill in the details below to add a book to the library</p>
+  </div>
+
+  <div class="glass rounded-3xl p-7 sm:p-8 shadow-2xl border border-white/10">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+          Book Title <span class="text-red-400">*</span>
+        </label>
+        <input type="text" id="title" name="title" required placeholder="e.g. Ways of Seeing"
+               class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+      </div>
+
+      <!-- Category + Price -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="category" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Category <span class="text-red-400">*</span>
+          </label>
+          <select id="category" name="category" required
+                  class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+            <option value="">Select a category…</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="price" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Price (£) <span class="text-red-400">*</span>
+          </label>
+          <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00"
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+      </div>
+
+      <!-- Rating -->
+      <div>
+        <label for="rating" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+          Rating
+        </label>
+        <select id="rating" name="rating"
+                class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+          <option value="">— No rating —</option>
+          {% for r in rating_choices %}
+            <option value="{{ r }}">
+              {% if r == 'One' %}⭐ One{% endif %}
+              {% if r == 'Two' %}⭐⭐ Two{% endif %}
+              {% if r == 'Three' %}⭐⭐⭐ Three{% endif %}
+              {% if r == 'Four' %}⭐⭐⭐⭐ Four{% endif %}
+              {% if r == 'Five' %}⭐⭐⭐⭐⭐ Five{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+          Description
+        </label>
+        <textarea id="description" name="description" rows="5"
+                  placeholder="Write a short description about the book…"
+                  class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all resize-y"></textarea>
+      </div>
+
+      <!-- Image URL + Source URL -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="image_url" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Cover Image URL
+          </label>
+          <input type="url" id="image_url" name="image_url" placeholder="https://example.com/cover.jpg"
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+        <div>
+          <label for="source_url" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+            Source URL
+          </label>
+          <input type="url" id="source_url" name="source_url" placeholder="https://books.toscrape.com/…"
+                 class="input-field w-full px-4 py-3.5 rounded-2xl text-sm transition-all">
+        </div>
+      </div>
+
+      <!-- Image preview (live) -->
+      <div id="imagePreviewBox" class="hidden">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Cover Preview</p>
+        <img id="imagePreview" src="" alt="Cover preview"
+             class="h-40 rounded-2xl object-cover border border-white/10 shadow-lg">
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-2">
+        <a href="{% url 'book_list' %}"
+           class="px-5 py-3 glass border border-white/10 hover:bg-white/5 text-gray-400 hover:text-white text-sm font-semibold rounded-2xl transition-all">
+          Cancel
+        </a>
+        <button type="submit"
+                class="px-8 py-3 btn-gradient text-white text-sm font-bold rounded-2xl shadow-xl shadow-indigo-500/25">
+          Add Book →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Live cover image preview
+  const imgInput = document.getElementById('image_url');
+  const previewBox = document.getElementById('imagePreviewBox');
+  const preview = document.getElementById('imagePreview');
+  imgInput.addEventListener('input', () => {
+    const url = imgInput.value.trim();
+    if (url) {
+      preview.src = url;
+      previewBox.classList.remove('hidden');
+    } else {
+      previewBox.classList.add('hidden');
+    }
+  });
+</script>
+{% endblock %}

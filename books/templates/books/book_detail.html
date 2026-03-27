@@ -1,0 +1,111 @@
+{% extends 'books/base.html' %}
+{% block title %}{{ book.title }} — LibraryMS{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Back -->
+  <a href="{% url 'book_list' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-400 glass px-4 py-2 rounded-xl border border-white/10 hover:border-indigo-500/40 transition-all mb-6">
+    ← Back to Library
+  </a>
+
+  <div class="glass rounded-3xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+    <div class="flex flex-col md:flex-row">
+
+      <!-- Cover -->
+      <div class="md:w-72 lg:w-80 flex-shrink-0 relative" style="min-height: 320px; background: linear-gradient(135deg, #1a1040, #0f2040)">
+        {% if book.image_url %}
+          <img src="{{ book.image_url }}" alt="{{ book.title }}" class="w-full h-full object-cover absolute inset-0">
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent to-black/30 md:bg-gradient-to-t md:from-black/40 md:via-transparent"></div>
+        {% else %}
+          <div class="absolute inset-0 flex items-center justify-center text-8xl">📘</div>
+        {% endif %}
+        {% if book.is_scraped %}
+          <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-indigo-600/80 backdrop-blur-sm border border-indigo-400/30 px-3 py-1 rounded-full text-xs font-bold text-white">
+            🔍 Scraped
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 p-7 sm:p-10">
+        <!-- Category + badge -->
+        <div class="flex flex-wrap items-center gap-2 mb-4">
+          <span class="text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300">
+            {{ book.category.name|default:"Uncategorized" }}
+          </span>
+          {% if book.rating %}
+            <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-yellow-500/15 border border-yellow-500/25 text-yellow-300">
+              {{ book.rating }} Stars
+            </span>
+          {% endif %}
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight mb-3">{{ book.title }}</h1>
+
+        <!-- Rating + price row -->
+        <div class="flex flex-wrap items-center gap-4 mb-6">
+          {% if book.rating %}
+            <div class="flex items-center gap-2">
+              <span class="text-yellow-400 text-xl">{{ book.rating_stars }}</span>
+            </div>
+          {% endif %}
+          <div class="text-4xl font-black  bg-clip-text" style="background: linear-gradient(135deg, #0f7dd7, #1d6be8)">
+            £{{ book.price }}
+          </div>
+        </div>
+
+        <!-- Description -->
+        {% if book.description %}
+        <div class="mb-6">
+          <h3 class="text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-3">About This Book</h3>
+          <p class="text-gray-400 text-sm leading-relaxed line-clamp-6 hover:line-clamp-none transition-all cursor-pointer" title="Click to expand">{{ book.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Meta grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+          <div class="bg-white/3 border border-white/8 rounded-2xl p-4">
+            <span class="block text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-1">Added On</span>
+            <span class="text-sm text-gray-300 font-semibold">{{ book.created_at|date:"N j, Y" }}</span>
+          </div>
+          <div class="bg-white/3 border border-white/8 rounded-2xl p-4">
+            <span class="block text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-1">Category</span>
+            <span class="text-sm text-violet-300 font-semibold">{{ book.category.name|default:"—" }}</span>
+          </div>
+          <div class="bg-white/3 border border-white/8 rounded-2xl p-4">
+            <span class="block text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-1">Source</span>
+            {% if book.source_url %}
+              <a href="{{ book.source_url }}" target="_blank" class="text-sm text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">View Original ↗</a>
+            {% else %}
+              <span class="text-sm text-gray-600 font-semibold">Manual Entry</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-wrap gap-3">
+          {% if user.is_authenticated %}
+            {% if user.groups.all.0.name == 'Admin' or user.groups.all.0.name == 'SuperAdmin' or user.is_superuser %}
+              <a href="{% url 'update_book' book.pk %}"
+                 class="inline-flex items-center gap-2 px-6 py-3 btn-gradient text-white text-sm font-bold rounded-2xl shadow-xl shadow-indigo-500/25">
+                ✏️ Edit Book
+              </a>
+            {% endif %}
+            {% if user.groups.all.0.name == 'SuperAdmin' or user.is_superuser %}
+              <a href="{% url 'delete_book' book.pk %}"
+                 class="inline-flex items-center gap-2 px-6 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/40 text-white text-sm font-bold rounded-2xl transition-all hover:-translate-y-0.5">
+                🗑 Delete
+              </a>
+            {% endif %}
+          {% endif %}
+          <a href="{% url 'book_list' %}"
+             class="inline-flex items-center gap-2 px-6 py-3 glass border border-white/10 hover:bg-white/5 text-gray-300 text-sm font-bold rounded-2xl transition-all">
+            ← Back
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

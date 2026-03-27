@@ -1,0 +1,75 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ─── Django ───────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# ─── Environment ──────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+
+# ─── Static files (collected) ─────────────────────────────────────────────────
+/staticfiles/
+/static_root/
+
+# ─── Distribution / Packaging ─────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.coverage
+.tox/
+htmlcov/
+.pytest_cache/
+coverage.xml
+*.cover
+
+# ─── IDEs & Editors ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swx
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Node (if any frontend tooling added later) ───────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ─── Migrations (keep initial, exclude auto-generated if preferred) ────────────
+# Uncomment below ONLY if you want to exclude migrations from version control:
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# ─── Jupyter Notebooks ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── Secrets / Keys ───────────────────────────────────────────────────────────
+secret_key.txt
+*.pem
+*.key

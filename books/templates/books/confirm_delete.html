@@ -1,0 +1,45 @@
+{% extends 'books/base.html' %}
+{% block title %}Delete Book — LibraryMS{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-12">
+  <div class="glass rounded-3xl overflow-hidden border border-red-500/20 shadow-2xl shadow-red-900/20">
+    <!-- Red gradient top bar -->
+    <div class="h-1.5 w-full" style="background: linear-gradient(90deg, #ef4444, #f97316)"></div>
+    <div class="p-8">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/15 border border-red-500/25 text-4xl mb-4">⚠️</div>
+        <h1 class="text-2xl font-extrabold text-white">Delete Book</h1>
+        <p class="text-gray-500 text-sm mt-2">This action is <strong class="text-red-400">permanent</strong> and cannot be undone.</p>
+      </div>
+
+      <!-- Book preview -->
+      <div class="flex items-center gap-4 bg-white/3 border border-white/8 rounded-2xl p-4 mb-6">
+        {% if book.image_url %}
+          <img src="{{ book.image_url }}" alt="{{ book.title }}" class="w-14 h-18 rounded-xl object-cover flex-shrink-0" style="height:72px">
+        {% else %}
+          <div class="w-14 flex-shrink-0 h-[72px] bg-gray-800 rounded-xl flex items-center justify-center text-2xl">📘</div>
+        {% endif %}
+        <div class="min-w-0">
+          <h3 class="font-bold text-white text-sm leading-snug truncate">{{ book.title }}</h3>
+          <span class="text-xs text-violet-400 font-semibold">{{ book.category.name|default:"Uncategorized" }}</span>
+          <div class="text-emerald-400 font-extrabold mt-1">£{{ book.price }}</div>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-gray-400 mb-6">You are about to delete <strong class="text-white">"{{ book.title }}"</strong>.</p>
+
+      <form method="post" class="flex gap-3">
+        {% csrf_token %}
+        <a href="{% url 'book_detail' book.pk %}"
+           class="flex-1 text-center py-3 glass border border-white/10 hover:bg-white/5 text-gray-300 text-sm font-semibold rounded-2xl transition-all">
+          Cancel
+        </a>
+        <button type="submit"
+                class="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-red-500/30 hover:-translate-y-0.5">
+          Yes, Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
