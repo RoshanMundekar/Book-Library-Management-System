@@ -4,6 +4,11 @@ A full-featured **Book Library Management System** built with Django 5.2, featur
 
 ---
 
+## Demo Video
+Watch here: https://drive.google.com/file/d/1Q-OSvHgjuKS_YXvazLQRlSvAIbD7bmu_/view?usp=sharing
+
+---
+
 ## 🖥️ Tech Stack
 
 | Layer | Technology |
