@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
 #or
 
-#username = roshan (also superadmin)
+#username = roshan (also user)
 #password = roshan@12345
 
 #or
