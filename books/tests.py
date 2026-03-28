@@ -210,11 +210,13 @@ class ScraperUnitTest(TestCase):
         }]
 
         # First save: should create
-        created, skipped = save_scraped_books(book_data, cat)
+        created, updated, skipped = save_scraped_books(book_data, cat)
         self.assertEqual(created, 1)
+        self.assertEqual(updated, 0)
         self.assertEqual(skipped, 0)
 
         # Second save: should skip (duplicate)
-        created, skipped = save_scraped_books(book_data, cat)
+        created, updated, skipped = save_scraped_books(book_data, cat)
         self.assertEqual(created, 0)
+        self.assertEqual(updated, 0)
         self.assertEqual(skipped, 1)
