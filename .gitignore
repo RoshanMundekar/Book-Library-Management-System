@@ -73,3 +73,7 @@ yarn-error.log*
 secret_key.txt
 *.pem
 *.key
+
+
+demo/*.gif
+demo/*.mp4
